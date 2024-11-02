@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Gematria Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        input[type="text"] { width: 300px; padding: 10px; font-size: 1.1em; }
+        input[type="submit"] { padding: 10px 20px; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <h1>Korean Gematria Calculator</h1>
+    <form method="POST">
+        <label for="korean_text">Enter Korean Text:</label>
+        <input type="text" id="korean_text" name="korean_text" value="{{ input_text }}" required>
+        <input type="submit" value="Calculate">
+    </form>
+
+    {% if gematria_value is not none %}
+    <h2>Gematria Value: {{ gematria_value }}</h2>
+    {% endif %}
+</body>
+</html>
