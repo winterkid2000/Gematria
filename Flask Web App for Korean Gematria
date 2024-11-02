@@ -1,0 +1,29 @@
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+# Korean Gematria Mapping - A simple mapping of Korean characters to arbitrary values
+# Example with common Hangul syllables, extend as needed
+KOREAN_GEMATRIA = {
+    '가': 1, '나': 2, '다': 3, '라': 4, '마': 5, '바': 6, '사': 7,
+    '아': 8, '자': 9, '차': 10, '카': 11, '타': 12, '파': 13, '하': 14
+}
+
+def calculate_gematria(text):
+    """Calculate the gematria value of the Korean text based on the KOREAN_GEMATRIA mapping."""
+    total = 0
+    for char in text:
+        total += KOREAN_GEMATRIA.get(char, 0)  # Default to 0 if char not in mapping
+    return total
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    gematria_value = None
+    input_text = ""
+    if request.method == "POST":
+        input_text = request.form.get("korean_text", "")
+        gematria_value = calculate_gematria(input_text)
+    return render_template("index.html", gematria_value=gematria_value, input_text=input_text)
+
+if __name__ == "__main__":
+    app.run(debug=True)
