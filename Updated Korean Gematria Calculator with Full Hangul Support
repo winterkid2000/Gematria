@@ -1,0 +1,60 @@
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+# Jamo Gematria Mapping - Assign unique values for each jamo (Korean consonants and vowels)
+# Extend the list if needed for all possible Korean jamo
+JAMO_GEMATRIA = {
+    'ㄱ': 1, 'ㄲ': 2, 'ㄴ': 3, 'ㄷ': 4, 'ㄸ': 5, 'ㄹ': 6, 'ㅁ': 7,
+    'ㅂ': 8, 'ㅃ': 9, 'ㅅ': 10, 'ㅆ': 11, 'ㅇ': 12, 'ㅈ': 13, 'ㅉ': 14,
+    'ㅊ': 15, 'ㅋ': 16, 'ㅌ': 17, 'ㅍ': 18, 'ㅎ': 19,
+    'ㅏ': 20, 'ㅐ': 21, 'ㅑ': 22, 'ㅒ': 23, 'ㅓ': 24, 'ㅔ': 25, 'ㅕ': 26,
+    'ㅖ': 27, 'ㅗ': 28, 'ㅘ': 29, 'ㅙ': 30, 'ㅚ': 31, 'ㅛ': 32, 'ㅜ': 33,
+    'ㅝ': 34, 'ㅞ': 35, 'ㅟ': 36, 'ㅠ': 37, 'ㅡ': 38, 'ㅢ': 39, 'ㅣ': 40
+}
+
+def decompose_hangul(char):
+    """Decompose a Hangul syllable into individual jamo (letters)."""
+    base_code, base_consonant, base_vowel = 0xAC00, 21, 28
+    code = ord(char) - base_code
+    if code < 0 or code > 11171:
+        return []  # Return empty if not a Hangul syllable
+    
+    lead = code // (base_consonant * base_vowel)
+    vowel = (code % (base_consonant * base_vowel)) // base_vowel
+    tail = (code % (base_consonant * base_vowel)) % base_vowel
+    
+    lead_jamo = chr(0x1100 + lead)
+    vowel_jamo = chr(0x1161 + vowel)
+    tail_jamo = chr(0x11A7 + tail) if tail > 0 else None
+    
+    return [lead_jamo, vowel_jamo] + ([tail_jamo] if tail_jamo else [])
+
+def calculate_gematria(text):
+    """Calculate the gematria value of the text and provide a breakdown per character."""
+    total = 0
+    breakdown = []
+    
+    for char in text:
+        jamos = decompose_hangul(char)  # Get decomposed jamo characters
+        char_value = sum(JAMO_GEMATRIA.get(j, 0) for j in jamos)
+        
+        breakdown.append((char, jamos, char_value))
+        total += char_value
+    
+    return total, breakdown
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    gematria_value = None
+    breakdown = None
+    input_text = ""
+    
+    if request.method == "POST":
+        input_text = request.form.get("korean_text", "")
+        gematria_value, breakdown = calculate_gematria(input_text)
+    
+    return render_template("index.html", gematria_value=gematria_value, input_text=input_text, breakdown=breakdown)
+
+if __name__ == "__main__":
+    app.run(debug=True)
