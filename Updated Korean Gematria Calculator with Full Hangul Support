@@ -44,6 +44,8 @@ def calculate_gematria(text):
     
     return total, breakdown
 
+##For using App code
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     gematria_value = None
